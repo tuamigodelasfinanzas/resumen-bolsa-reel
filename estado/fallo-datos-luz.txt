@@ -1,5 +1,6 @@
-Fallo de luz · 2026-10-24T18:26:11Z · ejecución 40120212278
-Precios de 2026-10-25 aún no publicados (intento 1)
-Luz 2026-10-25: media 0,182 €/kWh, barata 11:00-14:00, cara 20:00
+Fallo de luz · 2026-10-25T19:27:57Z · ejecución 40225530421
+Precios de 2026-10-26 aún no publicados (intento 1)
+Precios de 2026-10-26 aún no publicados (intento 2)
+Luz 2026-10-26: media 0,228 €/kWh, barata 13:00-16:00, cara 20:00
 Texto: 62 palabras → duración recomendada 15 s
 Historia generada, escala 0.80
