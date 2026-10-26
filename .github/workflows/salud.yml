@@ -1,0 +1,35 @@
+name: Salud diaria
+
+# Cada mañana manda a Telegram un semáforo de las tres cadenas de publicación (bolsa, Planet in Numbers y ZERO):
+# token de Instagram de este repo, escenarios y webhooks de Make, GitHub Pages y ejecuciones fallidas en 24 h.
+# Solo lee: no genera ni publica nada. La lógica está en zero-understands/.github/workflows/health.yml.
+on:
+  schedule:
+    - cron: "50 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  salud:
+    uses: tuamigodelasfinanzas/zero-understands/.github/workflows/health.yml@main
+    with:
+      label: Resumen Bolsa + Make + Pages
+      ig_check: true
+      ig_user: "17841438528056370"
+      make_check: true
+      pages_urls: >-
+        https://tuamigodelasfinanzas.github.io/resumen-bolsa-reel/
+        https://tuamigodelasfinanzas.github.io/planet-in-numbers/state/used.json
+        https://tuamigodelasfinanzas.github.io/zero-understands/state/rendered.json
+      runs_repos: >-
+        tuamigodelasfinanzas/resumen-bolsa-reel
+        tuamigodelasfinanzas/planet-in-numbers
+        tuamigodelasfinanzas/zero-understands
+    secrets:
+      IG_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+      MAKE_API_TOKEN: ${{ secrets.MAKE_API_TOKEN }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
