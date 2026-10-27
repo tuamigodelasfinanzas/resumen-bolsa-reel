@@ -4,11 +4,8 @@ name: Salud diaria
 # token de Instagram de este repo, escenarios y webhooks de Make, GitHub Pages y ejecuciones fallidas en 24 h.
 # Solo lee: no genera ni publica nada. La lógica está en zero-understands/.github/workflows/health.yml.
 on:
-  schedule:
-    # 07:45 Madrid: 07:15 is 05:15 UTC in summer (CEST) and 06:15 UTC in winter (CET). The "hora" job keeps
-    # only the run of the right time zone and waits until 07:45 sharp (GitHub's cron often starts late).
-    - cron: "15 5 * * *"
-    - cron: "15 6 * * *"
+  # Horario automático desactivado (28/10/2026): el aviso diario lo hace ahora el centro de mando
+  # (tuamigodelasfinanzas/centro-de-mando). Se puede lanzar a mano desde Actions.
   workflow_dispatch:
 
 permissions:
