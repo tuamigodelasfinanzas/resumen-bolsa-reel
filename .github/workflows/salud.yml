@@ -5,7 +5,10 @@ name: Salud diaria
 # Solo lee: no genera ni publica nada. La lógica está en zero-understands/.github/workflows/health.yml.
 on:
   schedule:
-    - cron: "50 6 * * *"
+    # 07:45 Madrid: 07:15 is 05:15 UTC in summer (CEST) and 06:15 UTC in winter (CET). The "hora" job keeps
+    # only the run of the right time zone and waits until 07:45 sharp (GitHub's cron often starts late).
+    - cron: "15 5 * * *"
+    - cron: "15 6 * * *"
   workflow_dispatch:
 
 permissions:
@@ -13,7 +16,22 @@ permissions:
   actions: read
 
 jobs:
+  hora:
+    runs-on: ubuntu-latest
+    outputs:
+      go: ${{ steps.w.outputs.go }}
+    steps:
+      - id: w
+        run: |
+          [ "${{ github.event_name }}" = schedule ] || { echo go=true >> "$GITHUB_OUTPUT"; exit 0; }
+          NOW=$(date +%s); T=$(TZ=Europe/Madrid date -d 'today 07:45' +%s); M=$(TZ=Europe/Madrid date +%H%M)
+          if [ "$M" -lt 0700 ] || [ "$M" -ge 0805 ]; then echo "::notice::Madrid $M: el cron del otro horario, nada que hacer"; echo go=false >> "$GITHUB_OUTPUT"; exit 0; fi
+          [ "$NOW" -lt "$T" ] && sleep $((T - NOW))
+          echo go=true >> "$GITHUB_OUTPUT"
+
   salud:
+    needs: hora
+    if: needs.hora.outputs.go == 'true'
     uses: tuamigodelasfinanzas/zero-understands/.github/workflows/health.yml@main
     with:
       label: Resumen Bolsa + Make + Pages
