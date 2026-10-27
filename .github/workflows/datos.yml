@@ -106,7 +106,7 @@ jobs:
           IG_USER: "17841438528056370"
           IMAGE_URL: ${{ steps.publish.outputs.url }}
           VIDEO_URL: ${{ steps.publish.outputs.video }}
-        run: bash tools/ig-story.sh
+        run: bash tools/ig-story.sh 2>&1 | tee ig.log; exit ${PIPESTATUS[0]}
       - name: Vídeo de la palabra del día a Telegram (para TikTok)
         if: ${{ inputs.kind == 'palabra' && inputs.dry_run != 'true' && steps.publish.outputs.video != '' }}
         continue-on-error: true
@@ -126,5 +126,5 @@ jobs:
           git config --global user.name "reel-bot"; git config --global user.email "reel-bot@users.noreply.github.com"
           REMOTE="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
           git clone --depth 1 --branch gh-pages "$REMOTE" site-fallo
-          mkdir -p site-fallo/estado && { echo "Fallo de ${{ inputs.kind }} · $(date -u +%FT%TZ) · ejecución ${GITHUB_RUN_ID}"; tail -n 60 run.log; } > "site-fallo/estado/fallo-datos-${{ inputs.kind }}.txt"
+          mkdir -p site-fallo/estado && { echo "Fallo de ${{ inputs.kind }} · $(date -u +%FT%TZ) · ejecución ${GITHUB_RUN_ID}"; tail -n 60 run.log; [ -f ig.log ] && { echo "--- publicación en Instagram ---"; tail -n 40 ig.log; }; } > "site-fallo/estado/fallo-datos-${{ inputs.kind }}.txt"
           cd site-fallo && git add -A && git commit -q -m "Fallo de la historia ${{ inputs.kind }}" && git push origin gh-pages || true

@@ -31,9 +31,20 @@ if [ -n "${VIDEO_URL:-}" ]; then
   done
 fi
 if [ "$VIDEO_OK" = "1" ]; then MODE=video
-elif create image; then MODE=image
-else echo "::error::No se pudo preparar la historia"; exit 1; fi
+else
+  IMG_OK=0
+  for TRY in 1 2 3; do
+    if create image; then IMG_OK=1; break; fi
+    echo "::warning::Intento $TRY de 3 con la imagen fallido"; sleep 30
+  done
+  [ "$IMG_OK" = "1" ] || { echo "::error::No se pudo preparar la historia"; exit 1; }
+  MODE=image
+fi
 if [ "${IG_NO_PUBLISH:-}" = "true" ]; then echo "::warning::PRUEBA sin publicar: modo=$MODE, video_url=${VIDEO_URL:-vacía}"; exit 0; fi
-OUT=$(curl -sS -X POST "$API/$IG_USER/media_publish" --data-urlencode "creation_id=$ID" --data-urlencode "access_token=$IG_TOKEN")
-echo "$OUT" | jq -e '.id' >/dev/null || { echo "::error::Fallo al publicar: $(echo "$OUT" | jq -c '.error // .' | safe)"; exit 1; }
-echo "::notice::Historia publicada ($MODE): $(echo "$OUT" | jq -r .id)"
+for TRY in 1 2 3 4; do
+  OUT=$(curl -sS -X POST "$API/$IG_USER/media_publish" --data-urlencode "creation_id=$ID" --data-urlencode "access_token=$IG_TOKEN")
+  if echo "$OUT" | jq -e '.id' >/dev/null; then echo "::notice::Historia publicada ($MODE): $(echo "$OUT" | jq -r .id)"; exit 0; fi
+  echo "::warning::Publicación, intento $TRY de 4: $(echo "$OUT" | jq -c '.error // .' | safe)"
+  sleep 30
+done
+echo "::error::Fallo al publicar: $(echo "$OUT" | jq -c '.error // .' | safe)"; exit 1
